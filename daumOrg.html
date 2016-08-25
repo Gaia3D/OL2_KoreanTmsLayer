@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>다음지도 테스트</title>
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no">
+<style type="text/css">
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map { width: 100%; height: 512px }
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+<script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=bbcde0f803fc1f3687fd0ef4ea9e7ba9d59f5949"></script>
+<script type="text/javascript">
+window.onload = init;
+
+function init() {
+	map =  new daum.maps.Map(document.getElementById('map'), {
+		center: new daum.maps.LatLng(37.537123, 127.005523)
+	});
+	var zoomControl = new daum.maps.ZoomControl();
+	map.addControl(zoomControl, daum.maps.ControlPosition.RIGHT);
+	var mapTypeControl = new daum.maps.MapTypeControl();
+	map.addControl(mapTypeControl, daum.maps.ControlPosition.TOPRIGHT);
+
+	daum.maps.event.addListener(map,"idle", onMapChange);
+}
+
+function onMapChange() {
+	$("#map img").css("border", "1px solid red");
+	var level = map.getLevel();
+	var llPnt = map.getBounds().getSouthWest();
+	var congCoord = convCoord(llPnt.getLng(), llPnt.getLat(), "WGS84", "WCONGNAMUL");
+	var wtmCoord = convCoord(llPnt.getLng(), llPnt.getLat(), "WGS84", "WTM");
+	var message = "레벨: " + level + "<br />";
+	message += "경위도: "+ llPnt.getLat() + "," + llPnt.getLng() + "<br />";
+	message += "다음좌표: "+ congCoord.x + "," + congCoord.y + "<br />";
+	message += "TM좌표: "+ wtmCoord.x + "," + wtmCoord.y + "<br />";
+	
+	document.getElementById("debug").innerHTML = message;
+}
+
+function convCoord(x, y, fromCoord, toCoord) {
+	var queryStr = './proxy.jsp?url='+encodeURIComponent('http://apis.daum.net/local/geo/transcoord?x='+x+'&y='+y+'&fromCoord='+fromCoord+'&toCoord='+toCoord+'&apikey=db317cd60a386d67551671002e61b00aa028a970');
+
+	var retVal = null;
+	$.ajax(
+		{
+			url: queryStr, 
+			dataType: 'json',
+			async: false,
+			success: function(data) {
+				retVal = data;
+			}
+		} 
+	);
+
+	return retVal;
+}
+
+</script>
+</head>
+<body>
+<div id="map"></div>
+<div id="debug" style="font-size:12px;width:590px;height:60px;border:solid 1px black;padding:5px;"></div>
+</body>
+</html>

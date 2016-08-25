@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>OpenLayers.Layer.Daum 테스트</title>
+        <link rel="stylesheet" href="js/theme/default/style.css" type="text/css">
+        <link rel="stylesheet" href="style.css" type="text/css">
+    </head>
+    <body>
+        <h1 id="title">OpenLayers.Layer.Daum Example</h1>
+        <div id="map" class="smallmap"></div>
+
+        <div id="debug" style="font-size:12px;width:590px;height:60px;border:solid 1px black;padding:5px;"></div>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <script type="text/javascript" src="js/lib/OpenLayers.js"></script>
+        <script type="text/javascript" src="OpenLayers.Layer.Daum.js"></script>
+<script>
+window.onload = init;
+
+var daumMap;
+function init() {
+	var daumLayer = new OpenLayers.Layer.Daum("Daum Map");
+	var  trafficLayer = new OpenLayers.Layer.WMS(
+	        "Ntic Map", "http://61.43.91.125:8080/geoserver/wms"
+	        ,{layers: 'STD_LINK', styles: '', format: 'image/png' ,transparent: true}
+	        ,{isBaseLayer: false, buffer:0, transitionEffect:'resize',displayOutsideMaxExtent:true}
+	);
+	
+	daumMap = new OpenLayers.Map({
+		div: "map",
+		layers: [daumLayer, trafficLayer],
+		controls: [
+			new OpenLayers.Control.Attribution(),
+			new OpenLayers.Control.Navigation({
+				dragPanOptions: {
+					enableKinetic: true
+				}
+			}),
+			new OpenLayers.Control.PanZoomBar(),
+			new OpenLayers.Control.Permalink({anchor: true}),
+			new OpenLayers.Control.LayerSwitcher()
+		],
+		center: [198032,451872],
+		zoom: 3,
+		eventListeners: {
+                        "moveend": onMapChange,
+                        "zoomend": onMapChange
+                   }
+	});
+	
+}
+function onMapChange(event) {
+	if (!daumMap) return;
+
+	//$("#map img").css("border", "1px solid red");
+	var level = daumMap.getZoom();
+	var bound = daumMap.getExtent();
+	var message = "레벨: " + level + "<br />";
+	message += "TM좌표: "+ bound.left + "," + bound.bottom + "<br />";
+	
+	document.getElementById("debug").innerHTML = message;
+}
+</script>
+    </body>
+</html>
